@@ -36,6 +36,7 @@ ARG GID
 ARG USER_NAME
 ARG GROUP_NAME
 ARG PASSWORD
+ARG PKGS_PATH_RLT
 
 RUN groupadd -g ${GID} ${GROUP_NAME} && \
     #groupadd -g ${GID} dialout && \
