@@ -22,7 +22,7 @@ services:
        - $HOME/.Xauthority/:/root/.Xauthority
        - /dev:/dev
        - ./turtlebot3_common:/colcon_ws/src/turtlebot3_common
-       - $PKGS_PATH_ABS:/colcon_ws/src/extra_pkgs
+       #- $PKGS_PATH_ABS:/colcon_ws/src/extra_pkgs
     devices:
        - /dev:/dev
     ipc: host
