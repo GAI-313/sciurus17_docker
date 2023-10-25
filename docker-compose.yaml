@@ -30,4 +30,5 @@ services:
     stdin_open: true
     user: "${UID}:${GID}"
     #command: /bin/bash -c "source ~/.bashrc; export TURTLEBOT3_MODEL=burger; ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py"
+    #command: /bin/bash -c "source ~/.bashrc; ros2 launch tb3_common turtlebot3_sim_minimum_bringup.launch.py"
     command: /bin/bash
