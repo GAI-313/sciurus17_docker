@@ -6,6 +6,7 @@ from launch_ros.actions import Node # ノードを追加するためのクラス
 from launch.actions import IncludeLaunchDescription # launch ファイルをインクルードするクラス
 from launch.substitutions import LaunchConfiguration # 置換設定
 from launch.actions import DeclareLaunchArgument # arg
+from launch.conditions import IfCondition, UnlessCondition # 実行可否を指定するためのパッケージ
 
 from ament_index_python.packages import get_package_share_directory # パッケージのパスを取得
 
@@ -18,6 +19,10 @@ def generate_launch_description():
 
         ld = LaunchDescription()
 
+        # view the rviz setting via argument
+        rviz_view_arg = DeclareLaunchArgument("rviz_view", default_value="true")
+        rviz_view = LaunchConfiguration("rviz_view")
+
         # gazebo simulation launch
         simulation = IncludeLaunchDescription(PythonLaunchDescriptionSource([
                         get_package_share_directory("turtlebot3_gazebo") + "/launch/turtlebot3_world.launch.py"])
@@ -28,14 +33,22 @@ def generate_launch_description():
                         get_package_share_directory("turtlebot3_bringup") + "/launch/turtlebot3_state_publisher.launch.py"])
         )
 
+        # joy control
+        joy = Node(package = "joy",
+                    executable = "joy_node")
+        joy_teleop = Node(package = "tb3_common",
+                    executable = "joy_teleop")
+
         # rviz2
         rviz = Node(package = "rviz2",
                     executable = "rviz2",
-                    arguments=["-d", os.path.join(
-                    get_package_share_directory("tb3_common"), "rviz", "minimum.rviz")])
+                    arguments=["-d", os.path.join(get_package_share_directory("tb3_common"), "rviz", "minimum.rviz")],
+                    condition=IfCondition(rviz_view))
 
         ld.add_action(simulation)
         ld.add_action(bringup)
+        ld.add_action(joy)
+        ld.add_action(joy_teleop)
         ld.add_action(rviz)
 
         return ld

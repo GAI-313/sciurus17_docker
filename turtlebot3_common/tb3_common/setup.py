@@ -32,6 +32,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            "joy_teleop = tb3_common.teleop_joy:main"
         ],
     },
 )
