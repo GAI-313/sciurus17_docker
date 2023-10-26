@@ -15,6 +15,7 @@ ros2 launch tb3_common turtlebot3_sim_minimum_bringup.launch.py
     <img src="https://gitlab.com/nakatogawalabolatory/docker/turtlebot_sim_docker/-/raw/main/img/Screenshot%20from%202023-10-26%2007-24-49.png" width="300">
 
 ## ロボットをコントロールする
+  Nintendo Switch Pro Controller で Turtlebot3 を制御する場合は、デフォルトでジョイスティックによる制御が有効になっている。<br>
 　keyboard teleop を実行するときは、新たなターミナルで
 ```bash
 docker-compose exec turtlebot3 /bin/bash
@@ -23,10 +24,19 @@ docker-compose exec turtlebot3 /bin/bash
 ```
 ros2 run turtlebot3_teleop teleop_keyboard
 ```
-を実行する。現在
-```tb3_common```
-内に Joy Teleop ノードを作成中。
+を実行する。
 
+## Rviz を非表示にする。
+　```turtlebot3_sim_minimum_bringup.launch.py```
+が起動するとデフォルトで RViz が起動する。これを防ぎたい場合は、
+```bash
+ros2 launch tb3_common turtlebot3_sim_minimum_bringup.launch.py rviz_view:=false
+```
+　のように、実行引数
+```rviz_view```
+を
+```false```
+にすればよい。
 ## ローカルのパッケージをコンテナ内に持ってくる
 　ローカルの ROS2 パッケージを使ってコンテナ内のTurtlebot3を制御したい場合は、このリポジトリディレクトリ内にある
 ```.env``` ファイルを編集する。
