@@ -5,7 +5,7 @@ docker-compose up -d --build turtlebot3; docker-compose exec turtlebot3 /bin/bas
 ```
 　コンテナ内で Gazebo シミュレーションを立ち上げるには、以下のコマンドを１度実行。
 ```bash
-ros2 launch tb3_common turtlebot3_sim_minimum_bringup.launch.py
+ros2 launch tb3_common turtlebot3_sim_minimum_bringup.launch.py rviz_view:=true
 ```
 　しばらく待つと Gazebo シミュレーションが立ち上がる。このとき下の図のようにロボットがいなければもう一度この起動コマンドを実行する。
 
