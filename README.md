@@ -118,3 +118,26 @@ docker-compose up -d --build turtlebot3; docker-compose exec turtlebot3 /bin/bas
 ```
 rosdep install -y -i --from-path src; colcon build --symlink-install; source ~/.bashrc
 ```
+
+## map をつくる
+このパッケージには
+```tb3_navigatoin```
+パッケージによるナビゲーションツールが用意されている。コンテナ内で以下のコマンドを実行すると、マップの作成が始まる。
+```
+ros2 launch tb3_navigation create_2d_map_cartographer.launch.py
+```
+作成が完了したら、新たなターミナルでコンテナに入り、以下のコマンドを実行すると、
+```tb3_navigation/map```
+に map データが保存される。
+```MAP_NAME```
+には好きな名前を入れるといい。
+```
+ros2 run nav2_map_server map_saver_cli -f /colcon_ws/src/turtlebot3_common/tb3_navigation/map/MAP_NAME
+```
+Navigation2 を利用したい場合、以下のコマンドを実行する。
+```
+ros2 launch tb3_navigation nav2_bringup.launch.py map:=/colcon_ws/src/turtlebot3_common/tb3_navigation/map/MAP_NAME.yaml
+```
+```MAP_NAME```
+には保存したマップ名を指定すること。<br>
+　起動したら Rviz2 が表示される。
