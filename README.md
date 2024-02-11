@@ -140,4 +140,7 @@ ros2 launch tb3_navigation nav2_bringup.launch.py map:=/colcon_ws/src/turtlebot3
 ```
 ```MAP_NAME```
 には保存したマップ名を指定すること。<br>
-　起動したら Rviz2 が表示される。
+　起動したら Rviz2 が表示される。このようにだいたい位置がずれているので、
+```2D Pose Estimate```
+で位置を修正する。それでも位置がずれている場合はコントローラーで微調整する。
+<img src="img/navigation2_rviz.pmg"/>
