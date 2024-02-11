@@ -14,6 +14,21 @@ ros2 launch tb3_common turtlebot3_sim_minimum_bringup.launch.py rviz_view:=true
 - ロボットがいる状態（正常）<br>
     <img src="https://gitlab.com/nakatogawalabolatory/docker/turtlebot_sim_docker/-/raw/main/img/Screenshot%20from%202023-10-26%2007-24-49.png" width="300">
 
+## ロボットのモデルを変更する
+　ロボットのモデルを変更する場合、
+```.env```
+ファイルの
+```TURTLEBOT3_MODEL```
+の値を変更する。デフォルトは
+```burger```
+だが、
+```waffule```
+または
+```waffulke_pi```
+を選択できる。<br>
+　```waffule```
+シリーズを選択すると、前方カメラが有効になる。
+
 ## ロボットをコントロールする
   Nintendo Switch Pro Controller で Turtlebot3 を制御する場合は、デフォルトでジョイスティックによる制御が有効になっている。<br>
 　keyboard teleop を実行するときは、新たなターミナルで
@@ -24,8 +39,19 @@ docker-compose exec turtlebot3 /bin/bash
 ```
 ros2 run turtlebot3_teleop teleop_keyboard
 ```
-を実行する。
-
+を実行する。<br>
+　ロボットモデルが
+```waffle```
+または
+```waffle_pi```
+である場合、カメラ映像経由での操作が可能になる。起動ファイルの引数
+```cam_teleop```
+を
+```true```
+にすることで有効になる。
+```bash
+ros2 launch tb3_common turtlebot3_sim_minimum_bringup.launch.py cam_teleop:=true
+```
 ## Rviz を非表示にする。
 　```turtlebot3_sim_minimum_bringup.launch.py```
 が起動するとデフォルトで RViz が起動する。これを防ぎたい場合は、
