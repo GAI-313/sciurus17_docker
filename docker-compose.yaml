@@ -15,6 +15,7 @@ services:
       - DISPLAY=${DISPLAY}
       - PULSE_SERVER=unix:/tmp/pulseaudio.socket
       - PULSE_COOKIE=/tmp/pulseaudio.cookie
+      - TURTLEBOT3_MODEL=${TURTLEBOT3_MODEL}
     volumes:
        - /tmp/.X11-unix:/tmp/.X11-unix
        #- /tmp/pulseaudio.socket:/tmp/pulseaudio.socket

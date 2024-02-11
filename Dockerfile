@@ -102,7 +102,7 @@ RUN cd /colcon_ws ;\
     source /opt/ros/humble/setup.bash ;\
     colcon build --symlink-install ;\
     echo "source /colcon_ws/install/setup.bash" >> /home/${USER_NAME}/.bashrc
-RUN echo "export TURTLEBOT3_MODEL=burger" >> /home/${USER_NAME}/.bashrc
+#RUN echo "export TURTLEBOT3_MODEL=burger" >> /home/${USER_NAME}/.bashrc
 
 # entrypoint
 COPY assets/setup.sh /tmp/setup.sh
