@@ -19,10 +19,14 @@ def generate_launch_description():
 
         ld = LaunchDescription()
 
+        # get robot model
+        robot_model = os.environ['TURTLEBOT3_MODEL']
         # view the rviz setting via argument
-        rviz_view_arg = DeclareLaunchArgument("rviz_view", default_value="false")
         rviz_view = LaunchConfiguration("rviz_view")
-
+        rviz_view_arg = DeclareLaunchArgument("rviz_view", default_value="false")
+        # cam teleop arg
+        cam_teleop_conf = LaunchConfiguration("cam_teleop")
+        cam_teleop_conf_arg = DeclareLaunchArgument("cam_teleop", default_value="false")
         # gazebo simulation launch
         simulation = IncludeLaunchDescription(PythonLaunchDescriptionSource([
                         get_package_share_directory("turtlebot3_gazebo") + "/launch/turtlebot3_world.launch.py"])
@@ -39,17 +43,24 @@ def generate_launch_description():
         joy_teleop = Node(package = "tb3_common",
                     executable = "joy_teleop")
 
+        # cam control
+        cam_teleop = Node(package = "tb3_common",
+                    executable = "cam_teleop",
+                    condition=IfCondition(cam_teleop_conf))
+
         # rviz2
         rviz = Node(package = "rviz2",
                     executable = "rviz2",
-                    arguments=["-d", os.path.join(get_package_share_directory("tb3_common"), "rviz", "minimum.rviz")],
+                    arguments=["-d", os.path.join(get_package_share_directory("tb3_common"), "rviz", "minimum_%s.rviz"%robot_model)],
                     condition=IfCondition(rviz_view))
 
         ld.add_action(rviz_view_arg)
+        ld.add_action(cam_teleop_conf_arg)
         ld.add_action(simulation)
         ld.add_action(bringup)
         ld.add_action(joy)
         ld.add_action(joy_teleop)
+        ld.add_action(cam_teleop)
         ld.add_action(rviz)
 
         return ld
