@@ -20,7 +20,7 @@ def generate_launch_description():
         ld = LaunchDescription()
 
         # view the rviz setting via argument
-        rviz_view_arg = DeclareLaunchArgument("rviz_view", default_value="true")
+        rviz_view_arg = DeclareLaunchArgument("rviz_view", default_value="false")
         rviz_view = LaunchConfiguration("rviz_view")
 
         # gazebo simulation launch
@@ -45,6 +45,7 @@ def generate_launch_description():
                     arguments=["-d", os.path.join(get_package_share_directory("tb3_common"), "rviz", "minimum.rviz")],
                     condition=IfCondition(rviz_view))
 
+        ld.add_action(rviz_view_arg)
         ld.add_action(simulation)
         ld.add_action(bringup)
         ld.add_action(joy)
