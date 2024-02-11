@@ -5,13 +5,14 @@ from launch import LaunchDescription # Launcher
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch_ros.actions import Node
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import ThisLaunchDir
+from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory 
 
 def generate_launch_description():
     try:
         # デフォルトコンフィグを設定
-        use_sim_time = LaunchConfigulation("use_sim_time", default="true") # シミュレーション環境なのでデフォルトはtrue
+        use_sim_time = LaunchConfiguration("use_sim_time", default="true") # シミュレーション環境なのでデフォルトはtrue
+        tb3_navigation_prefix = get_package_share_directory('tb3_navigation')
         turtlebot3_cartographer_prefix = get_package_share_directory('turtlebot3_cartographer')
         cartographer_config_dir = LaunchConfiguration('cartographer_config_dir', default=os.path.join(
                                                       turtlebot3_cartographer_prefix, 'config'))
@@ -57,7 +58,7 @@ def generate_launch_description():
                 description='OccupancyGrid publishing period'),
 
             IncludeLaunchDescription(
-                PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/occupancy_grid.launch.py']),
+                PythonLaunchDescriptionSource([turtlebot3_cartographer_prefix, '/launch/occupancy_grid.launch.py']),
                 launch_arguments={'use_sim_time': use_sim_time, 'resolution': resolution,
                                   'publish_period_sec': publish_period_sec}.items(),
             ),
@@ -71,4 +72,4 @@ def generate_launch_description():
                 output='screen'),
         ])
     except:
-        traceback.print_exec()
+        traceback.print_exc()
