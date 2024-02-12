@@ -23,6 +23,12 @@ def generate_launch_description():
 
         # get nav2 prefix
         nav2_prefix = get_package_share_directory('nav2_bringup')
+        default_map_path = os.path.join(get_package_share_directory('tb3_navigation'),
+                                                    'map', os.environ['WORLD'] + '_map.yaml')
+
+        print(default_map_path)
+        
+        #map = LaunchConfiguration("map", default=default_map_path)
         map = LaunchConfiguration("map")
 
         # add actions
@@ -31,6 +37,7 @@ def generate_launch_description():
                                             description='Use simulation (Gazebo) clock if true')
 
         declare_map = DeclareLaunchArgument('map',
+                                            default_value=default_map_path,
                                             description='Navigation で使用したい map ファイルを選択してください')
 
         nav2_bringup = IncludeLaunchDescription(
