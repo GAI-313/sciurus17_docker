@@ -86,6 +86,7 @@ RUN mkdir -p /colcon_ws/src
 RUN sudo apt update; sudo apt install -y ros-humble-turtlebot3*
 RUN sudo apt install ros-humble-rqt-tf-tree
 RUN sudo apt install ros-humble-tf*
+RUN sudo pip3 install transforms3d
 ###
 
 # user setting
