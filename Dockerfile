@@ -85,6 +85,7 @@ RUN mkdir -p /colcon_ws/src
 ### package setting is here
 RUN sudo apt update; sudo apt install -y ros-humble-turtlebot3*
 RUN sudo apt install ros-humble-rqt-tf-tree
+RUN sudo apt install ros-humble-tf*
 ###
 
 # user setting
