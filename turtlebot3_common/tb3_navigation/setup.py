@@ -19,6 +19,7 @@ data_files = package_files("launch/", data_files)
 data_files = package_files("config/", data_files)
 data_files = package_files("rviz/", data_files)
 data_files = package_files("map/", data_files)
+data_files = package_files("scripts/", data_files)
 
 setup(
     name=package_name,
