@@ -126,6 +126,11 @@ rosdep install -y -i --from-path src; colcon build --symlink-install; source ~/.
 ```
 ros2 launch tb3_navigation create_2d_map_cartographer.launch.py
 ```
+```auto_map_save:=true```
+を追加すると、５秒おきに自動的にマップを保存してくれる。手動でマップを保存したい場合は次のステップを読むこと。
+```
+ros2 launch tb3_navigation create_2d_map_cartographer.launch.py auto_map_savee:=true
+```
 作成が完了したら、新たなターミナルでコンテナに入り、以下のコマンドを実行すると、
 ```tb3_navigation/map```
 に map データが保存される。
@@ -134,12 +139,23 @@ ros2 launch tb3_navigation create_2d_map_cartographer.launch.py
 ```
 ros2 run nav2_map_server map_saver_cli -f /colcon_ws/src/turtlebot3_common/tb3_navigation/map/MAP_NAME
 ```
-Navigation2 を利用したい場合、以下のコマンドを実行する。
+
+# Navigation を実装する
+ Naviation を実装するには、以下のコマンドを実行する。
+```
+ros2 launch tb3_navigation nav2_bringup.launch.py
+```
+自身で作成したマップを使用したい場合は、
 ```
 ros2 launch tb3_navigation nav2_bringup.launch.py map:=/colcon_ws/src/turtlebot3_common/tb3_navigation/map/MAP_NAME.yaml
 ```
+のように、
+```map.yaml```
+のフルパスを
+```map:```
+に指定すること。
 ```MAP_NAME```
-には保存したマップ名を指定すること。<br>
+<br>
 　起動したら Rviz2 が表示される。このようにだいたい位置がずれているので、
 ```2D Pose Estimate```
 で位置を修正する。それでも位置がずれている場合はコントローラーで微調整する。
