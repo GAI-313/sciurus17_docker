@@ -20,6 +20,7 @@ def generate_launch_description():
 
         # config
         map = LaunchConfiguration("map")
+        use_sim_time = LaunchConfiguration("use_sim_time")
 
         # add actions
         declare_use_sim_time = DeclareLaunchArgument('use_sim_time',
