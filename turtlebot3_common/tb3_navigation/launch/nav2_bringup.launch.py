@@ -10,14 +10,6 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
     try:
         ld = LaunchDescription()
-        # デフォルトコンフィグを設定
-        use_sim_time = LaunchConfiguration("use_sim_time", default="true") # シミュレーション環境なのでデフォルトはtrue
-        param_dir = LaunchConfiguration(
-            'params_file',
-            default=os.path.join(
-                get_package_share_directory('turtlebot3_navigation2'),
-                'param',
-                os.environ['TURTLEBOT3_MODEL'] + '.yaml'))
         rviz_config_dir = os.path.join(get_package_share_directory('tb3_navigation'),
                                        'rviz', 'tb3_navigation.rviz')
 
@@ -26,9 +18,7 @@ def generate_launch_description():
         default_map_path = os.path.join(get_package_share_directory('tb3_navigation'),
                                                     'map', os.environ['WORLD'] + '_map.yaml')
 
-        print(default_map_path)
-        
-        #map = LaunchConfiguration("map", default=default_map_path)
+        # config
         map = LaunchConfiguration("map")
 
         # add actions
