@@ -6,6 +6,7 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch_ros.actions import Node
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch.conditions import IfCondition, UnlessCondition 
 from ament_index_python.packages import get_package_share_directory 
 
 def generate_launch_description():
@@ -20,11 +21,16 @@ def generate_launch_description():
                                                      default='turtlebot3_lds_2d.lua')
         resolution = LaunchConfiguration('resolution', default='0.05')
         publish_period_sec = LaunchConfiguration('publish_period_sec', default='1.0')
+        mapsave_conf = LaunchConfiguration('auto_map_save', default='false')
 
         rviz_config_dir = os.path.join(get_package_share_directory('turtlebot3_cartographer'),
                                        'rviz', 'tb3_cartographer.rviz')
 
         return LaunchDescription([
+            DeclareLaunchArgument(
+                'auto_map_save',
+                default_value='false',
+                description='execute auto map saver'),
             DeclareLaunchArgument(
                 'cartographer_config_dir',
                 default_value=cartographer_config_dir,
@@ -63,6 +69,12 @@ def generate_launch_description():
                                   'publish_period_sec': publish_period_sec}.items(),
             ),
 
+            Node(
+                package='tb3_navigation',
+                executable='auto_map_saver',
+                name='auto_map_saver',
+                condition=IfCondition(mapsave_conf)),
+            
             Node(
                 package='rviz2',
                 executable='rviz2',
