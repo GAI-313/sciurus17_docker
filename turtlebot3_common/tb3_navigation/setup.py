@@ -19,7 +19,7 @@ data_files = package_files("launch/", data_files)
 data_files = package_files("config/", data_files)
 data_files = package_files("rviz/", data_files)
 data_files = package_files("map/", data_files)
-data_files = package_files("scripts/", data_files)
+data_files = package_files("sample_scripts/", data_files)
 
 setup(
     name=package_name,
@@ -35,8 +35,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'sample_navigation = sample_scripts.sample_navigation:main',
             'auto_map_saver = tb3_navigation.auto_map_saver:main',
-            'test = tb3_navigation.test:main'
         ],
     },
 )
