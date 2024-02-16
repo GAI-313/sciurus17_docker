@@ -29,6 +29,37 @@ ros2 launch tb3_common turtlebot3_sim_minimum_bringup.launch.py rviz_view:=true
 　```waffule```
 シリーズを選択すると、前方カメラが有効になる。
 
+## ワールドを選択する
+　ロボットをスポーンさせるワールドも
+```.env```
+から選択することができる。選択可能なワールドは以下の通り。
+```
+# World モデルを選択してください
+# turtlebot3_dqn_stage1
+# turtlebot3_dqn_stage2
+# turtlebot3_dqn_stage3
+# turtlebot3_dqn_stage4
+# turtlebot3_house
+# turtlebot3_world
+```
+```.env```
+の
+```WORLD=```
+に上記のワールド名のどれか一つを選択する。おすすめは
+```turtlebot3_world```
+である。<br>
+　広範囲なロケーションを動きたい場合は
+```turtlebot3_house```
+を選択するといいが、
+**Nvidia 搭載 PC でも起動に５分以上かかる**
+ので気長に待つ必要がある。
+
+> **ワールド選択について**<br>
+    　今後ワールド選択方法は環境変数から
+    **launch引数**
+    へ移行する予定である。以降後本ドキュメントも更新される。
+
+
 ## ロボットをコントロールする
   Nintendo Switch Pro Controller で Turtlebot3 を制御する場合は、デフォルトでジョイスティックによる制御が有効になっている。<br>
 　keyboard teleop を実行するときは、新たなターミナルで
