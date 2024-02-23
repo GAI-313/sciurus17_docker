@@ -27,6 +27,10 @@ ros2 launch s17_bringup bringup.launch.py
 　一方以下のような姿勢になっていたら失敗です。Launch を再起動してください。
 <img src="img/invarid_gazebo.png" width=400>
 
+本リポジトリ内にあるパッケージに関しては
+[こちら](sciurus17_common)
+を参照してください。
+
 ## init_pose サービス
 　別のターミナルでコンテナに入り、コンテナ内で以下のコマンドを実行するとロボットが私が定義した初期姿勢に遷移します。
 ```bash
