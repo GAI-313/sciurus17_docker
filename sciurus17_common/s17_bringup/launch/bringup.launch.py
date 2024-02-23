@@ -40,8 +40,14 @@ def generate_launch_description():
             executable='pose_srvs',
         )
 
+        description_set_pose_srvs = Node(
+            package='s17_common',
+            executable='set_pose.py',
+        )
+
         ld.add_action(description_bringup)
         ld.add_action(description_pose_srvs)
+        ld.add_action(description_set_pose_srvs)
         
         return ld
     except:
