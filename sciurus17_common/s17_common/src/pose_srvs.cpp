@@ -13,6 +13,10 @@ public:
             "left_arm_controller/joint_trajectory", 10);
         r_traj_pub = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
             "right_arm_controller/joint_trajectory", 10);
+        n_traj_pub = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+            "neck_controller/joint_trajectory", 10);
+        w_traj_pub = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+            "waist_yaw_controller/joint_trajectory", 10);
 
         // サービスを作成
         init_pose_service_ = this->create_service<std_srvs::srv::SetBool>(
@@ -38,6 +42,9 @@ public:
             -0.75,  // r_arm_joint6
             0.0,    // r_arm_joint7
         };
+
+        n_pose = {0.0, 0.0};
+        w_pose = {0.0};
     }
 
 private:
@@ -50,6 +57,9 @@ private:
 
             trajectory_msgs::msg::JointTrajectory l_traj;
             trajectory_msgs::msg::JointTrajectory r_traj;
+            trajectory_msgs::msg::JointTrajectory n_traj;
+            trajectory_msgs::msg::JointTrajectory w_traj;
+
             l_traj.joint_names = l_joints;
             l_traj.points.resize(1);
             l_traj.points[0].positions = l_pose;
@@ -58,13 +68,25 @@ private:
             r_traj.points.resize(1);
             r_traj.points[0].positions = r_pose;
 
+            n_traj.joint_names = n_joints;
+            n_traj.points.resize(1);
+            n_traj.points[0].positions = n_pose;
+
+            w_traj.joint_names = w_joints;
+            w_traj.points.resize(1);
+            w_traj.points[0].positions = w_pose;
+
             // 到達時間を設定（例: 3秒で目標ポイントへ到達）
             l_traj.points[0].time_from_start = rclcpp::Duration(2, 0);
             r_traj.points[0].time_from_start = rclcpp::Duration(2, 0);
+            n_traj.points[0].time_from_start = rclcpp::Duration(2, 0);
+            w_traj.points[0].time_from_start = rclcpp::Duration(2, 0);
 
             // 制御信号としてジョイント軌道をパブリッシュ
             l_traj_pub->publish(l_traj);
             r_traj_pub->publish(r_traj);
+            n_traj_pub->publish(n_traj);
+            w_traj_pub->publish(w_traj);
 
             response->success = true;
             response->message = "Init pose executed.";
@@ -77,12 +99,18 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
     rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr l_traj_pub;
     rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr r_traj_pub;
+    rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr n_traj_pub;
+    rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr w_traj_pub;
     rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr init_pose_service_;
     sensor_msgs::msg::JointState::SharedPtr initial_joint_state_;
     std::vector<double> l_pose;
     std::vector<double> r_pose;
+    std::vector<double> n_pose;
+    std::vector<double> w_pose;
     std::vector<std::string> l_joints{"l_arm_joint1", "l_arm_joint2", "l_arm_joint3", "l_arm_joint4", "l_arm_joint5", "l_arm_joint6", "l_arm_joint7"};
     std::vector<std::string> r_joints{"r_arm_joint1", "r_arm_joint2", "r_arm_joint3", "r_arm_joint4", "r_arm_joint5", "r_arm_joint6", "r_arm_joint7"};
+    std::vector<std::string> n_joints{"neck_yaw_joint", "neck_pitch_joint"};
+    std::vector<std::string> w_joints{"waist_yaw_joint"};
 };
 
 int main(int argc, char** argv) {
