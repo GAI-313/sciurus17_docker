@@ -44,11 +44,6 @@ RUN groupadd -g ${GID} ${GROUP_NAME} && \
     echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 WORKDIR /home/${USER_NAME}
 
-ENV NVIDIA_VISIBLE_DEVICES \
-    ${NVIDIA_VISIBLE_DEVICES:-all}
-ENV NVIDIA_DRIVER_CAPABILITIES \
-    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
-
 # ROS2 install
 RUN apt update \
   && apt install -y --no-install-recommends \

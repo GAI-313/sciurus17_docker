@@ -1,5 +1,44 @@
 version: "3"
 services:
+  sciurus17-gpu:
+    container_name: humble-s17-gpu
+    image: humble:s17-gpu
+    privileged: true
+    build:
+      context: .
+      args:
+        - USER_NAME=${USER_NAME}
+        - GROUP_NAME=${GROUP_NAME}
+        - UID=${UID}
+        - GID=${GID}
+    environment:
+      - DISPLAY=${DISPLAY}
+      - PULSE_SERVER=unix:/tmp/pulseaudio.socket
+      - PULSE_COOKIE=/tmp/pulseaudio.cookie
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all}
+      - NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+    volumes:
+       - /tmp/.X11-unix:/tmp/.X11-unix
+       - $HOME/.Xauthority/:/root/.Xauthority
+       - /dev:/dev
+       - ./sciurus17_common/:/colcon_ws/src/sciurus17_common/
+       #- $PKGS_PATH_ABS:/colcon_ws/src/extra_pkgs
+    devices:
+       - /dev:/dev
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ipc: host
+    network_mode: host
+    tty: true
+    stdin_open: true
+    user: "${UID}:${GID}"
+    command: /bin/bash
+
   sciurus17:
     container_name: humble-s17
     image: humble:s17
@@ -23,18 +62,9 @@ services:
        #- $PKGS_PATH_ABS:/colcon_ws/src/extra_pkgs
     devices:
        - /dev:/dev
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
     ipc: host
     network_mode: host
     tty: true
     stdin_open: true
     user: "${UID}:${GID}"
-    #command: /bin/bash -c "source ~/.bashrc; export TURTLEBOT3_MODEL=burger; ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py"
-    #command: /bin/bash -c "source ~/.bashrc; ros2 launch tb3_common turtlebot3_sim_minimum_bringup.launch.py"
     command: /bin/bash
