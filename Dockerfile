@@ -44,6 +44,11 @@ RUN groupadd -g ${GID} ${GROUP_NAME} && \
     echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 WORKDIR /home/${USER_NAME}
 
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+
 # ROS2 install
 RUN apt update \
   && apt install -y --no-install-recommends \
@@ -83,7 +88,9 @@ RUN rosdep init
 RUN mkdir -p /colcon_ws/src
 
 ### package setting is here
-RUN sudo apt update; sudo apt install -y ros-humble-turtlebot3*
+RUN cd /colcon_ws/src ;\
+    git clone -b ros2 https://github.com/rt-net/sciurus17_ros.git ;\
+    git clone -b ros2 https://github.com/rt-net/sciurus17_description.git
 RUN sudo apt install -y ros-humble-rqt-tf-tree
 RUN sudo apt install -y ros-humble-tf*
 RUN sudo pip3 install transforms3d
@@ -94,7 +101,7 @@ RUN usermod -aG dialout ${USER_NAME}
 # ps1
 RUN echo "PS1='\[\033[47;30m\]HUMBLE\[\033[0m\]@\[\033[32m\]\u\[\033[0m\]:\[\033[1;33m\]\w\[\033[0m\]$ '" >> /home/${USER_NAME}/.bashrc
 # build
-COPY turtlebot3_common /colcon_ws/src/turtlebot3_common
+COPY sciurus17_common /colcon_ws/src/sciurus17_common
 RUN chmod -R 777 /colcon_ws
 USER ${USER_NAME}
 RUN cd /colcon_ws ;\

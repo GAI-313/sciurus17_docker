@@ -1,8 +1,8 @@
 version: "3"
 services:
-  turtlebot3:
-    container_name: humble-tb3
-    image: humble:tb3
+  sciurus17:
+    container_name: humble-s17
+    image: humble:s17
     privileged: true
     build:
       context: .
@@ -15,18 +15,21 @@ services:
       - DISPLAY=${DISPLAY}
       - PULSE_SERVER=unix:/tmp/pulseaudio.socket
       - PULSE_COOKIE=/tmp/pulseaudio.cookie
-      - TURTLEBOT3_MODEL=${TURTLEBOT3_MODEL}
-      - WORLD=${WORLD}
     volumes:
        - /tmp/.X11-unix:/tmp/.X11-unix
-       #- /tmp/pulseaudio.socket:/tmp/pulseaudio.socket
-       #- /tmp/pulseaudio.client.conf:/etc/pulse/client.conf
        - $HOME/.Xauthority/:/root/.Xauthority
        - /dev:/dev
-       - ./turtlebot3_common:/colcon_ws/src/turtlebot3_common
+       - ./sciurus17_common/:/colcon_ws/src/sciurus17_common/
        #- $PKGS_PATH_ABS:/colcon_ws/src/extra_pkgs
     devices:
        - /dev:/dev
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     ipc: host
     network_mode: host
     tty: true
