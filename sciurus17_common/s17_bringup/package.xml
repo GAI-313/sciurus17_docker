@@ -14,6 +14,7 @@
 
   <depend>s17_common</depend>
   <depend>s17_vision</depend>
+  <depend>s17_msgs</depend>
 
   <export>
     <build_type>ament_python</build_type>
