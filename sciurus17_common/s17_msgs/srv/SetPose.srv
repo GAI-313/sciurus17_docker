@@ -1,0 +1,9 @@
+# SetPose.srv
+
+# サービスでやり取りするデータ型の定義
+string[] pose_names  # リスト形式の文字列データ
+float32[] pose_values  # リスト形式の浮動小数点数データ
+
+---
+string result_message  # string型の結果メッセージ
+bool success  # bool型の成功フラグ
