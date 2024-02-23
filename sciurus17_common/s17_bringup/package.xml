@@ -13,6 +13,7 @@
   <test_depend>python3-pytest</test_depend>
 
   <depend>s17_common</depend>
+  <depend>s17_vision</depend>
 
   <export>
     <build_type>ament_python</build_type>
