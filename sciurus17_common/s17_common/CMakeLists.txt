@@ -17,10 +17,13 @@ find_package(rclpy REQUIRED)
 
 include_directories(include)
 add_executable(pose_srvs src/pose_srvs.cpp)
+add_executable(set_pose src/set_pose.cpp)
 ament_target_dependencies(pose_srvs rclcpp sensor_msgs trajectory_msgs control_msgs std_srvs)
+ament_target_dependencies(set_pose rclcpp sensor_msgs trajectory_msgs control_msgs std_srvs)
 
 install(TARGETS
   pose_srvs
+  set_pose
   DESTINATION lib/${PROJECT_NAME}
 )
 
