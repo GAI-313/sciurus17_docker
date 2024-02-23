@@ -22,6 +22,8 @@ ros2 launch s17_bringup bringup.launch.py
 ```bash
 ros2 service call /s17_common/init_pose std_srvs/srv/SetBool "{data: true}"
 ```
+ソースコードは
+[こちら。](sciurus17_common/s17_common/src/pose_srvs.cpp)
 
 ## 終了
 　コンテナから出て、ホスト内で以下のコマンドを実行
@@ -34,4 +36,5 @@ docker compose down
 　作業領域内の平面部を検出するノードを作成する。
 
 ## ObstacleDetection（作成中）
-　コリジョンを検出し、Moveit の動作に対応させる。
+　コリジョンを検出し、Moveit の動作に対応させる。ソースコードは
+[こちら。](sciurus17_common/s17_vision/src/obstacle_detection.cpp)
