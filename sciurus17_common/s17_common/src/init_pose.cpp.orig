@@ -1,0 +1,159 @@
+#include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
+#include "control_msgs/msg/joint_controller_state.hpp"
+#include "trajectory_msgs/msg/joint_trajectory.hpp"
+
+class RobotController : public rclcpp::Node {
+public:
+    RobotController() : Node("robot_controller") {
+        // サブスクライバーを作成
+        joint_state_subscriber_ = this->create_subscription<sensor_msgs::msg::JointState>(
+            "joint_states", 10, std::bind(&RobotController::jointStateCallback, this, std::placeholders::_1));
+
+        // パブリッシャーを作成
+        l_traj_pub = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+            "left_arm_controller/joint_trajectory", 10);
+        r_traj_pub = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+            "right_arm_controller/joint_trajectory", 10);
+
+        // 目標姿勢の初期化
+        /*
+        target_joint_positions_ = {
+            0.0,  // neck_pitch_joint
+            0.0,  // neck_yaw_joint
+            0.0,  // l_arm_joint1
+            0.0,  // l_arm_joint2
+            0.0,  // l_arm_joint3
+            0.0,  // l_arm_joint4
+            0.0,  // l_arm_joint5
+            0.0,  // l_arm_joint6
+            0.0,  // l_arm_joint7
+            0.0,  // l_gripper_joint
+            0.0,  // l_gripper_mimic_joint_mimic
+            0.0,  // r_arm_joint1
+            0.0,  // r_arm_joint2
+            0.0,  // r_arm_joint3
+            0.0,  // r_arm_joint4
+            0.0,  // r_arm_joint5
+            0.0,  // r_arm_joint6
+            0.0,  // r_arm_joint7
+            0.0,  // r_gripper_joint
+            0.0,  // r_gripper_mimic_joint_mimic
+            0.0   // waist_yaw_joint
+        };
+        */
+        // ここに制御アルゴリズムを追加
+        // タイマーを使って周期的に目標姿勢を送信する
+
+        pose = {
+            1.57,  // l_arm_joint1
+            1.57,  // l_arm_joint2
+            0.0,  // l_arm_joint3
+            -2.36,  // l_arm_joint4
+            0.0,  // l_arm_joint5
+            0.75,  // l_arm_joint6
+            0.0,  // l_arm_joint7
+        };
+
+        l_pose = {
+            1.57,  // l_arm_joint1
+            1.57,  // l_arm_joint2
+            0.0,  // l_arm_joint3
+            -2.36,  // l_arm_joint4
+            0.0,  // l_arm_joint5
+            0.75,  // l_arm_joint6
+            0.0,  // l_arm_joint7
+        };
+
+        r_pose = {
+            -1.57,  // r_arm_joint1
+            -1.57,  // r_arm_joint2
+            0.0,  // r_arm_joint3
+            2.36,  // r_arm_joint4
+            0.0,  // r_arm_joint5
+            -0.75,  // r_arm_joint6
+            0.0,  // r_arm_joint7
+        };
+
+        l_joints = {
+            "l_arm_joint1",
+            "l_arm_joint2",
+            "l_arm_joint3",
+            "l_arm_joint4",
+            "l_arm_joint5",
+            "l_arm_joint6",
+            "l_arm_joint7",
+        };
+
+        r_joints = {
+            "r_arm_joint1",
+            "r_arm_joint2",
+            "r_arm_joint3",
+            "r_arm_joint4",
+            "r_arm_joint5",
+            "r_arm_joint6",
+            "r_arm_joint7",
+        };
+
+        control_timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(1000), std::bind(&RobotController::controlLoop, this));
+    }
+
+private:
+    void jointStateCallback(const sensor_msgs::msg::JointState::SharedPtr joint_state) {
+        // 初期姿勢を取得
+        if (!initial_joint_state_) {
+            initial_joint_state_ = joint_state;
+        }
+    }
+
+    void controlLoop() {
+        // 初期姿勢が取得されていることを確認
+        if (initial_joint_state_) {
+            // 制御アルゴリズム: 初期姿勢を目標とする
+            RCLCPP_INFO(this->get_logger(), "Go to init ...");
+            
+            trajectory_msgs::msg::JointTrajectory l_traj;
+            trajectory_msgs::msg::JointTrajectory r_traj;
+            l_traj.joint_names = l_joints;
+            l_traj.points.resize(1);
+            l_traj.points[0].positions = l_pose;
+
+            r_traj.joint_names = r_joints;
+            r_traj.points.resize(1);
+            r_traj.points[0].positions = r_pose;
+
+            // 到達時間を設定（例: 3秒で目標ポイントへ到達）
+            l_traj.points[0].time_from_start = rclcpp::Duration(2, 0);
+            r_traj.points[0].time_from_start = rclcpp::Duration(2, 0);
+
+            // 制御信号としてジョイント軌道をパブリッシュ
+            l_traj_pub->publish(l_traj);
+            r_traj_pub->publish(r_traj);
+
+            rclcpp::shutdown();
+        } else {
+            RCLCPP_WARN(this->get_logger(), "Initial joint state not yet received.");
+        }
+    }
+
+    rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
+    rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr l_traj_pub;
+    rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr r_traj_pub;
+    sensor_msgs::msg::JointState::SharedPtr initial_joint_state_;
+    std::vector<double> target_joint_positions_;
+    std::vector<double> pose;
+    std::vector<double> l_pose;
+    std::vector<double> r_pose;
+    std::vector<std::string> l_joints;
+    std::vector<std::string> r_joints;
+    rclcpp::TimerBase::SharedPtr control_timer_;
+};
+
+int main(int argc, char** argv) {
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<RobotController>();
+    rclcpp::spin(node);
+    rclcpp::shutdown();
+    return 0;
+}
