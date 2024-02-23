@@ -10,12 +10,22 @@
     ```bash
     ./entry_exec.bash
     ```
-    　ビルドが成功すると自動的にコンテナにエントリーします。
+    　ビルドが成功すると自動的にコンテナにエントリーします。Nvidia GPU を搭載している PC は
+    ```bash
+    ./entry_exec.bash -gpu
+    ```
+    とオプション ```-gpu``` をつけてください。
 
 ## 起動
 ```bash
 ros2 launch s17_bringup bringup.launch.py
 ```
+　コンテナに入ったあとに初めて Launch を起動すると少々時間がかかります。ロボットが以下のような姿勢になっていたら成功です。
+
+<img src="img/true_gazebo.png" width=400>
+
+　一方以下のような姿勢になっていたら失敗です。Launch を再起動してください。
+<img src="img/invalid_gazebo.png" width=400>
 
 ## init_pose サービス
 　別のターミナルでコンテナに入り、コンテナ内で以下のコマンドを実行するとロボットが私が定義した初期姿勢に遷移します。
