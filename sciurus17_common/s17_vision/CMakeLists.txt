@@ -9,12 +9,13 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 
 include_directories(include)
 add_executable(obstacle_detection src/obstacle_detection.cpp)
-ament_target_dependencies(obstacle_detection rclcpp sensor_msgs)
+ament_target_dependencies(obstacle_detection rclcpp sensor_msgs visualization_msgs)
 
 install(TARGETS
   obstacle_detection
