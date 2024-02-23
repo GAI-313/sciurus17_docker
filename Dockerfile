@@ -15,6 +15,12 @@ RUN apt update \
 ENV LANG ja_JP.UTF-8
 ENV TZ=Asia/Tokyo
 
+
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+    
 # packages install
 RUN apt-get update && apt-get install -y \
   build-essential \
@@ -86,7 +92,8 @@ RUN mkdir -p /colcon_ws/src
 RUN cd /colcon_ws/src ;\
     git clone -b ros2 https://github.com/rt-net/sciurus17_ros.git ;\
     git clone -b ros2 https://github.com/rt-net/sciurus17_description.git
-RUN sudo apt install -y ros-humble-rqt-tf-tree
+RUN sudo apt update ;\
+    sudo apt install -y ros-humble-rqt-tf-tree
 RUN sudo apt install -y ros-humble-tf*
 RUN sudo pip3 install transforms3d
 ###
