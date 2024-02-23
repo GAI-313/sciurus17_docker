@@ -17,23 +17,20 @@ find_package(rclpy REQUIRED)
 
 include_directories(include)
 add_executable(pose_srvs src/pose_srvs.cpp)
-add_executable(set_pose src/set_pose.cpp)
+#add_executable(set_pose src/set_pose.cpp)
 ament_target_dependencies(pose_srvs rclcpp sensor_msgs trajectory_msgs control_msgs std_srvs)
-ament_target_dependencies(set_pose rclcpp sensor_msgs trajectory_msgs control_msgs std_srvs)
+#ament_target_dependencies(set_pose rclcpp sensor_msgs trajectory_msgs control_msgs s17_common)
 
 install(TARGETS
   pose_srvs
-  set_pose
   DESTINATION lib/${PROJECT_NAME}
 )
 
-set(srv_files
-  "srv/SetPose.srv"
+ament_python_install_package(${PROJECT_NAME})
+install(PROGRAMS
+  scripts/set_pose.py
+  DESTINATION lib/${PROJECT_NAME}
 )
-rosidl_generate_interfaces(${PROJECT_NAME}
-  ${srv_files}
-)
-ament_export_dependencies(rosidl_default_runtime)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
