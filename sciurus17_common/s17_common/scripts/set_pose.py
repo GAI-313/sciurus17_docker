@@ -41,14 +41,14 @@ class PoseControl:
                     self.node.get_logger().warn('Joint \'%s\' is not exist !'%joint_name)
                     result = 'Joint \'%s\' is not exist !'%joint_name
 
-            self._joint_publish()
+            self._joint_publish(req.duration)
 
             res.result = result
             res.success = True
 
         return res
 
-    def _joint_publish(self):
+    def _joint_publish(self, d):
         l_traj = JointTrajectory()
         r_traj = JointTrajectory()
         n_traj = JointTrajectory()
@@ -72,25 +72,25 @@ class PoseControl:
         point = JointTrajectoryPoint()
         l_traj.joint_names = list(l_traj_dict.keys())
         point.positions = list(l_traj_dict.values())
-        point.time_from_start = rclpy.duration.Duration(seconds=2).to_msg()
+        point.time_from_start = rclpy.duration.Duration(seconds=d).to_msg()
         l_traj.points.append(point)
 
         point = JointTrajectoryPoint()
         r_traj.joint_names = list(r_traj_dict.keys())
         point.positions = list(r_traj_dict.values())
-        point.time_from_start = rclpy.duration.Duration(seconds=2).to_msg()
+        point.time_from_start = rclpy.duration.Duration(seconds=d).to_msg()
         r_traj.points.append(point)
 
         point = JointTrajectoryPoint()
         n_traj.joint_names = list(n_traj_dict.keys())
         point.positions = list(n_traj_dict.values())
-        point.time_from_start = rclpy.duration.Duration(seconds=2).to_msg()
+        point.time_from_start = rclpy.duration.Duration(seconds=d).to_msg()
         n_traj.points.append(point)
 
         point = JointTrajectoryPoint()
         w_traj.joint_names = list(w_traj_dict.keys())
         point.positions = list(w_traj_dict.values())
-        point.time_from_start = rclpy.duration.Duration(seconds=2).to_msg()
+        point.time_from_start = rclpy.duration.Duration(seconds=d).to_msg()
         w_traj.points.append(point)
 
         self.l_traj_pub.publish(l_traj)
