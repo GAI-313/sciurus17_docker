@@ -40,6 +40,10 @@ ros2 service call /s17_common/init_pose std_srvs/srv/SetBool "{data: true}"
 ソースコードは
 [こちら。](sciurus17_common/s17_common/src/pose_srvs.cpp)
 
+## s17_common API
+　勉強用としてかんたんな API を作成しました。s17_common パッケージにある API については
+[こちら。](sciurus17_common/s17_common/s17_common)
+
 ## 終了
 　コンテナから出て、ホスト内で以下のコマンドを実行
 ```bash
