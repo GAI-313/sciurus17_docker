@@ -1,5 +1,6 @@
 string[] joint_name
 float32[] position 
+float32 duration 3.0
 ---
 string result 
 bool success
