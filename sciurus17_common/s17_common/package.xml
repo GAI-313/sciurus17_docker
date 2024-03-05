@@ -18,7 +18,7 @@
   <test_depend>ament_lint_common</test_depend>
 
   <depend>rclcpp</depend>
-  <depend>rcly</depend>
+  <depend>rclpy</depend>
   <depend>sensor_msgs</depend>
 
   <export>
