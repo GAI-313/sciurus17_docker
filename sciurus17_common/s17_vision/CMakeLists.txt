@@ -19,6 +19,10 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
@@ -37,7 +41,7 @@ include_directories(
 add_executable(obstacle_detection src/obstacle_detection.cpp)
 add_executable(space_finder src/space_finder.cpp)
 ament_target_dependencies(obstacle_detection rclcpp sensor_msgs visualization_msgs)
-ament_target_dependencies(space_finder rclcpp sensor_msgs pcl_conversions)
+ament_target_dependencies(space_finder rclcpp sensor_msgs geometry_msgs pcl_conversions std_srvs tf2_ros tf2_geometry_msgs)
 
 target_link_libraries(obstacle_detection ${PCL_LIBRARIES})  # PCLのライブラリをリンク
 target_link_libraries(space_finder ${PCL_LIBRARIES})  # PCLのライブラリをリンク
