@@ -15,20 +15,20 @@ node = Node('sample_code')
 rc = RobotControl(node)
 ```
 
-### left_arm
+### left_arm_joints
 　左手の関節を制御します。制御したいジョイント
 ```joint1 ~ joint7```
 を引数に弧度法の角度値を入力してください。
 
-### right_arm
+### right_arm_joints
 　右手の関節を制御します。制御したいジョイント
 ```joint1 ~ joint7```
 を引数に弧度法の角度値を入力してください。
 
-### neck
+### neck_joints_
 　首関節を制御します。```pitch, yaw``` 任意引数をとり、弧度法で角度値を入力してください。
 
-### waist_yaw
+### waist_yaw_joints
 　胴体の yaw 軸を制御します。必須引数 ```yaw``` に弧度法で角度値を入力してください。
 
 ### init_pose
