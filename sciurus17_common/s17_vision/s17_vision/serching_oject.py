@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+from geometry_msgs.msg import PoseStamped
+from std_srvs.srv import SetBool
+from rclpy.node import Node
+import rclpy
+import smach
+import time
+import traceback
+
+class SerchingObject(smach.State):
+    def __init__ (self, node, obj_detect_client):
+        smach.State.__init__(self, outcomes=['found','not_found','failure'],
+                                   input_keys=['timeout_sec'],
+                                   output_keys=['object_pose'])
+        self.node = node
+        self.obj_detect_client = obj_detect_client
+        self.send_req(True) # object serching start
+        self.pose = None # target object pose
+        self.obj_sub = self.node.create_subscription(PoseStamped, 's17_vision/object_info', self.object_cb, 10)
+
+    def send_req(self, data):
+        req = SetBool.Request()
+        req.data = data
+        future = self.obj_detect_client.call_async(req)
+        self.node.get_logger().info(str(future))
+
+    def object_cb(self, data):
+        self.pose = data
+        
+    def execute(self, userdata):
+        try:
+            init_time = time.time()
+            while self.pose is None or time.time() - init_time < userdata.timeout_sec:
+                rclpy.spin_once(self.node)
+            self.send_req(False)
+            if self.pose is None:
+                return 'not_found'
+            self.node.get_logger().info('Found object in \n%s'%str(self.pose.pose.position))
+            userdata.object_pose = self.pose
+            return 'found'
+        except:
+            self.node.get_logger().error('Error is occured in SerchingObject \n%s'%traceback.format_exc())
+            return 'failure'
