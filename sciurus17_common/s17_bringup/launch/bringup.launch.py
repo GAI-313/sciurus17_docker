@@ -45,9 +45,20 @@ def generate_launch_description():
             executable='set_pose.py',
         )
 
+        description_moveit2_control = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                [
+                    get_package_share_directory(
+                        's17_bringup'
+                    )+ '/launch/moveit_control.launch.py'
+                ]
+            )
+        )
+
         ld.add_action(description_bringup)
         ld.add_action(description_pose_srvs)
         ld.add_action(description_set_pose_srvs)
+        ld.add_action(description_moveit2_control)
         
         return ld
     except:
