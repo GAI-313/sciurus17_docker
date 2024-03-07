@@ -2,12 +2,15 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "control_msgs/msg/joint_controller_state.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
-#include "std_srvs/srv/set_bool.hpp"
+#include "s17_common/srv/set_pose.hpp"
 
 class RobotController : public rclcpp::Node {
 public:
     RobotController() : Node("set_pose") {
         RCLCPP_INFO(this->get_logger(), "Start set_pose service");
+        // ジョイント状態をサブスクライブ
+        joint_state_subscriber_ = this->create_subscription<sensor_msgs::msg::JointState>(
+            "joint_states", 10, std::bind(&RobotController::jointStateCallback, this, std::placeholders::_1));
         // パブリッシャーを作成
         l_traj_pub = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
             "left_arm_controller/joint_trajectory", 10);
@@ -19,8 +22,12 @@ public:
             "waist_yaw_controller/joint_trajectory", 10);
 
         // サービスを作成
-        init_pose_service_ = this->create_service<std_srvs::srv::SetBool>(
+        init_pose_service_ = this->create_service<s17_common::srv::SetPose>(
             "/s17_common/set_pose", std::bind(&RobotController::handleInitPoseService, this, std::placeholders::_1, std::placeholders::_2));
+
+        // 初期ジョイント状態を取得し、joint_map_ を初期化
+        initial_joint_state_ = getCurrentJointState();
+        initializeJointMap();
 
         // 目標姿勢の初期化
         l_pose = {
@@ -48,51 +55,47 @@ public:
     }
 
 private:
-    void handleInitPoseService(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-                               std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+    void handleInitPoseService(const std::shared_ptr<s17_common::srv::SetPose::Request> request,
+                               std::shared_ptr<s17_common::srv::SetPose::Response> response)
     {
-        if (request->data) {
-            // 初期姿勢を目標とする
-            RCLCPP_INFO(this->get_logger(), "Go to pose ...");
+         if (!request->pose_names.empty() && !request->pose_values.empty()) {
+            // ジョイント名リストとジョイント角度リストが空でない場合の処理
+            RCLCPP_INFO(this->get_logger(), "Set pose ...");
 
-            trajectory_msgs::msg::JointTrajectory l_traj;
-            trajectory_msgs::msg::JointTrajectory r_traj;
-            trajectory_msgs::msg::JointTrajectory n_traj;
-            trajectory_msgs::msg::JointTrajectory w_traj;
+            // サービスから得られたジョイント名と角度を取得
+            const auto& pose_names = request->pose_names;
+            const auto& pose_values = request->pose_values;
 
-            l_traj.joint_names = l_joints;
-            l_traj.points.resize(1);
-            l_traj.points[0].positions = l_pose;
-
-            r_traj.joint_names = r_joints;
-            r_traj.points.resize(1);
-            r_traj.points[0].positions = r_pose;
-
-            n_traj.joint_names = n_joints;
-            n_traj.points.resize(1);
-            n_traj.points[0].positions = n_pose;
-
-            w_traj.joint_names = w_joints;
-            w_traj.points.resize(1);
-            w_traj.points[0].positions = w_pose;
-
-            // 到達時間を設定（例: 3秒で目標ポイントへ到達）
-            l_traj.points[0].time_from_start = rclcpp::Duration(2, 0);
-            r_traj.points[0].time_from_start = rclcpp::Duration(2, 0);
-            n_traj.points[0].time_from_start = rclcpp::Duration(2, 0);
-            w_traj.points[0].time_from_start = rclcpp::Duration(2, 0);
-
-            // 制御信号としてジョイント軌道をパブリッシュ
-            l_traj_pub->publish(l_traj);
-            r_traj_pub->publish(r_traj);
-            n_traj_pub->publish(n_traj);
-            w_traj_pub->publish(w_traj);
-
+            // ジョイント名と角度の対応を確認し、存在すれば角度を変更
+            for (size_t i = 0; i < pose_names.size(); ++i) {
+                if (joint_map_.find(pose_names[i]) != joint_map_.end()) {
+                    // ジョイントが存在する場合、角度を変更
+                    joint_map_[pose_names[i]] = pose_values[i];
+                    // ここで実際の制御信号のパブリッシュなどの処理を追加する
+                } else {
+                    RCLCPP_WARN(this->get_logger(), "Joint '%s' not found.", pose_names[i].c_str());
+                }
+            }
+            
             response->success = true;
-            response->message = "Init pose executed.";
+            response->result_message = "pose executed.";
         } else {
             response->success = false;
-            response->message = "Invalid request. Data should be true.";
+            response->result_message = "Invalid request. Data should be true.";
+        }
+    }
+
+    // 初期ジョイント状態を取得する関数
+    sensor_msgs::msg::JointState::SharedPtr getCurrentJointState() {
+        // 適切な方法で現在のジョイント状態を取得する実装
+        // 例: サブスクライバーを用いて現在のジョイント状態を取得するなど
+    }
+    
+    // joint_map_ を初期化する関数
+    void initializeJointMap() {
+        joint_map_.clear();
+        for (size_t i = 0; i < initial_joint_state_->name.size(); ++i) {
+            joint_map_[initial_joint_state_->name[i]] = initial_joint_state_->position[i];
         }
     }
 
@@ -101,7 +104,7 @@ private:
     rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr r_traj_pub;
     rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr n_traj_pub;
     rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr w_traj_pub;
-    rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr init_pose_service_;
+    rclcpp::Service<s17_common::srv::SetPose>::SharedPtr init_pose_service_;
     sensor_msgs::msg::JointState::SharedPtr initial_joint_state_;
     std::vector<double> l_pose;
     std::vector<double> r_pose;
@@ -111,6 +114,7 @@ private:
     std::vector<std::string> r_joints{"r_arm_joint1", "r_arm_joint2", "r_arm_joint3", "r_arm_joint4", "r_arm_joint5", "r_arm_joint6", "r_arm_joint7"};
     std::vector<std::string> n_joints{"neck_yaw_joint", "neck_pitch_joint"};
     std::vector<std::string> w_joints{"waist_yaw_joint"};
+    std::map<std::string, double> joint_map_;
 };
 
 int main(int argc, char** argv) {
