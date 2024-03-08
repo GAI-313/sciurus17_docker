@@ -3,7 +3,7 @@
 #include "geometry_msgs/msg/pose.hpp"
 #include "s17_msgs/srv/set_position.hpp"
 
-const std::string PLANNING_GROUP = "l_arm_group";
+const std::string PLANNING_GROUP = "l_arm_waist_group";
 
 class LeftArmController
 {
