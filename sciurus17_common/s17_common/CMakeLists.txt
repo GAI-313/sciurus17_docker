@@ -46,6 +46,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   scripts/set_pose.py
   scripts/gaze_table.py
+  scripts/sample_move.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
