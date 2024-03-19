@@ -1,0 +1,9 @@
+planning_pipelines:
+  - pipeline: pilz_cartesian_planning
+    config: /colcon_ws/src/sciurus17_ros/sciurus17_moveit_config/config/pilz_cartesian_limits.yaml
+  - pipeline: pilz_joint_planning
+    config: /colcon_ws/src/sciurus17_ros/sciurus17_moveit_config/config/joint_limits.yaml
+  - pipeline: pilz_kinematics
+    config: /colcon_ws/src/sciurus17_ros/sciurus17_moveit_config/config/kinematics.yaml
+  - pipeline: pilz_position_controllers
+    config: /colcon_ws/src/sciurus17_ros/sciurus17_moveit_config/config/moveit_controllers.yaml

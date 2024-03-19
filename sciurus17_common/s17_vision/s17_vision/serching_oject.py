@@ -9,12 +9,11 @@ import traceback
 
 class SerchingObject(smach.State):
     def __init__ (self, node, obj_detect_client):
-        smach.State.__init__(self, outcomes=['found','not_found','failure'],
-                                   input_keys=['timeout_sec'],
+        smach.State.__init__(self, outcomes=['found','not_found','clean','failure'],
+                                   input_keys=['timeout_sec', 'hand_status'],
                                    output_keys=['object_pose'])
         self.node = node
         self.obj_detect_client = obj_detect_client
-        self.send_req(True) # object serching start
         self.pose = None # target object pose
         self.obj_sub = self.node.create_subscription(PoseStamped, 's17_vision/object_info', self.object_cb, 10)
 
@@ -28,12 +27,23 @@ class SerchingObject(smach.State):
         self.pose = data
         
     def execute(self, userdata):
+        self.node.get_logger().info('Serching object ... wait time is %f sec'%userdata.timeout_sec)
+        self.pose = None # delete data
         try:
+            time.sleep(1.0)
+            self.send_req(True) # object serching start
             init_time = time.time()
-            while self.pose is None or time.time() - init_time < userdata.timeout_sec:
+            while time.time() - init_time < userdata.timeout_sec:
+            #while self.pose is None:
                 rclpy.spin_once(self.node)
+                if time.time() - init_time > userdata.timeout_sec / 2 and self.pose is not None:
+                    print('Found !')
+                    break
             self.send_req(False)
             if self.pose is None:
+                if any(userdata.hand_status):
+                    self.node.get_logger().info('Put other object ...')
+                    return 'clean'
                 return 'not_found'
             self.node.get_logger().info('Found object in \n%s'%str(self.pose.pose.position))
             userdata.object_pose = self.pose

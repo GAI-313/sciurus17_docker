@@ -32,6 +32,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'clean_table = s17_tasks.clean_table:main'
         ],
     },
 )
