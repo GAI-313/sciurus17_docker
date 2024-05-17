@@ -17,7 +17,7 @@ import traceback
 
 class ObjectGrasp(smach.State):
     def __init__(self, node, rc):
-        smach.State.__init__(self, outcomes=['success', 'continue', 'timeout', 'failure'],
+        smach.State.__init__(self, outcomes=['success', 'timeout', 'failure'],
                                    input_keys=['object_pose', 'hand_status'],
                                    output_keys=['hand_status'])
         self.node = node
@@ -27,26 +27,9 @@ class ObjectGrasp(smach.State):
         try:
             pose = userdata.object_pose
             pose_point = [pose.pose.position.x, pose.pose.position.y, pose.pose.position.z]
-
-            if not userdata.hand_status[0]:
-                self.rc.right_gripper()
-                self.rc.right_arm_position(pose_point[0],
-                                            pose_point[1],
-                                            0.3, roll=math.radians(90))
-                self.rc.right_arm_position(pose_point[0],
-                                            pose_point[1],
-                                            pose_point[2]+0.07, roll=math.radians(90))
-                self.rc.right_gripper(False)
-                self.rc.right_arm_position(pose_point[0],
-                                            pose_point[1],
-                                            0.3, roll=math.radians(90))
-                userdata.hand_status[0] = True
-
-                self.rc.init_pose(duration=3.0, wait=False)
-                self.rc.neck_joints(pitch=math.radians(-80), duration=3.0)
-
-                return 'continue'
-            else:
+            print(pose_point)
+            if pose_point[1] > 0:
+                self.node.get_logger().info('grasp object to left hand')
                 self.rc.left_arm_position(pose_point[0],
                                             pose_point[1],
                                             0.3, roll=math.radians(-90))
@@ -58,10 +41,20 @@ class ObjectGrasp(smach.State):
                 self.rc.left_arm_position(pose_point[0],
                                             pose_point[1],
                                             0.3, roll=math.radians(-90))
-                self.rc.waist_yaw_joints(math.radians(0), duration=3.0)
-                self.rc.left_arm_position(0.1, 0.1, 0.1,
-                                            roll=math.radians(-90))
-                userdata.hand_status[1] = True
+            else:
+                self.node.get_logger().info('grasp object to right hand')
+                self.rc.right_arm_position(pose_point[0],
+                                            pose_point[1],
+                                            0.3, roll=math.radians(90))
+                self.rc.right_gripper()
+                self.rc.right_arm_position(pose_point[0],
+                                            pose_point[1],
+                                            pose_point[2]+0.07, roll=math.radians(90))
+                self.rc.right_gripper(False)
+                self.rc.right_arm_position(pose_point[0],
+                                            pose_point[1],
+                                            0.3, roll=math.radians(90))
+            self.rc.init_pose(duration=2.0)
             return 'success'
         except:
             self.node.get_logger().error('Error is occured in ObjectGrasp \n%s'%traceback.format_exc())

@@ -177,9 +177,8 @@ if __name__ == '__main__':
     rclpy.init()
     node = Node('sample_robot_control')
     rc = RobotControl(node)
-    #rc.init_pose()
-    # limit = 0.08
     rc.right_gripper(True)
+    rc.right_gripper(False)
     
     node.destroy_node()
     rclpy.shutdown()
