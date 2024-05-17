@@ -47,6 +47,7 @@ install(PROGRAMS
   scripts/set_pose.py
   scripts/gaze_table.py
   scripts/sample_move.py
+  scripts/init_pose.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

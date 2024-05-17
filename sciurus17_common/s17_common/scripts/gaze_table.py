@@ -11,8 +11,8 @@ def main():
     node = Node('gaze_table')
 
     rc = RobotControl(node)
-    rc.init_pose()
-    rc.neck_joints(pitch=math.radians(-80))
+    rc.init_pose(duration=1.5)
+    rc.neck_joints(pitch=math.radians(-80), duration=2.0)
 
     node.destroy_node()
     rclpy.shutdown()

@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
+from s17_common.robot_control import RobotControl
 from rclpy.node import Node
 import rclpy
-
-class InitPose:
-    def __init__(self node):
-        self.node = node
-        self.node.get_logger().info('Go to init pose ...')
-
-    def get_current_pose():
 
 def main():
     rclpy.init()
     node = Node('s17_init_pose')
+    rc = RobotControl(node)
 
-    ip = InitPose(node)
+    rc.init_pose(duration=1.5)
 
     node.destroy_node()
     rclpy.shutdown()
