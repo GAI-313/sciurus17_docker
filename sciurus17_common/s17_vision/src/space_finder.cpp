@@ -72,95 +72,103 @@ private:
     void pc_callback(const sensor_msgs::msg::PointCloud2::SharedPtr pointcloud_msg) {
 
         if (detection_active_) {
-            RCLCPP_INFO(this->get_logger(), "Processing for pointcloud ...");
-            // SpaceFinder 処理
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-            pcl::fromROSMsg(*pointcloud_msg, *cloud);
-            // RGB値を赤色に設定
-            for (auto& point : cloud->points) {
-                point.r = 255;
-                point.g = 0;
-                point.b = 0;
-            }
-            // 平面検出
-            pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
-            pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
-            pcl::SACSegmentation<pcl::PointXYZRGB> seg;
-            seg.setOptimizeCoefficients(true);
-            seg.setModelType(pcl::SACMODEL_PLANE);
-            seg.setMethodType(pcl::SAC_RANSAC);
-            seg.setMaxIterations(1000);
-            seg.setDistanceThreshold(0.01);
-            seg.setInputCloud(cloud);
-            seg.segment(*inliers, *coefficients);
-            // 平面に該当する点を抽出
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_plane(new pcl::PointCloud<pcl::PointXYZRGB>);
-            pcl::ExtractIndices<pcl::PointXYZRGB> extract;
-            extract.setInputCloud(cloud);
-            extract.setIndices(inliers);
-            extract.setNegative(false);
-            extract.filter(*cloud_plane);
-
-            // 平面以外の点を抽出
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_not_plane(new pcl::PointCloud<pcl::PointXYZRGB>);
-            extract.setNegative(true);
-            extract.filter(*cloud_not_plane);
-
-            // 物体の中心座標と幅を計算
-            if (!cloud_not_plane->empty()) {
-                std::vector<pcl::PointIndices> cluster_indices;
-                pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ec;
-                ec.setClusterTolerance(0.02);  // クラスタとみなす点間の最大距離
-                ec.setMinClusterSize(100);     // クラスタの最小サイズ
-                ec.setMaxClusterSize(25000);   // クラスタの最大サイズ
-                ec.setSearchMethod(tree);
-                ec.setInputCloud(cloud_not_plane);
-                ec.extract(cluster_indices);
-
-                for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
-                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZRGB>);
-                    for (const auto& idx : it->indices) {
-                        cloud_cluster->points.push_back(cloud_not_plane->points[idx]);
-                    }
-
-                    // 物体の中心座標を計算
-                    Eigen::Vector4f centroid;
-                    pcl::compute3DCentroid(*cloud_cluster, centroid);
-
-                    // 物体の幅を計算
-                    pcl::PointXYZRGB min_point, max_point;
-                    pcl::getMinMax3D(*cloud_cluster, min_point, max_point);
-                    double width = max_point.x - min_point.x;
-
-                    // 物体の中心座標と幅をメッセージに格納
-                    geometry_msgs::msg::PoseStamped object_info_msg;
-                    object_info_msg.header = pointcloud_msg->header;
-                    object_info_msg.pose.position.x = centroid[0];
-                    object_info_msg.pose.position.y = centroid[1];
-                    object_info_msg.pose.position.z = centroid[2];
-                    object_info_msg.pose.orientation.w = centroid[3];
-                    //object_info_msg.pose.orientation.w = width;
-
-                    convertToBaseLinkFrame(object_info_msg);
-
-                    // リストに追加
-                    detected_objects_list.push_back(object_info_msg);
+            try {
+                // SpaceFinder 処理
+                pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+                pcl::fromROSMsg(*pointcloud_msg, *cloud);
+                // RGB値を赤色に設定
+                for (auto& point : cloud->points) {
+                    point.r = 255;
+                    point.g = 0;
+                    point.b = 0;
                 }
-                // 検出した物体情報を一度にパブリッシュ
-                publish_detected_objects();
+                RCLCPP_INFO(this->get_logger(), "Processing for pointcloud ...");
+                // 平面検出
+                pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
+                pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
+                pcl::SACSegmentation<pcl::PointXYZRGB> seg;
+                seg.setOptimizeCoefficients(true);
+                seg.setModelType(pcl::SACMODEL_PLANE);
+                seg.setMethodType(pcl::SAC_RANSAC);
+                seg.setMaxIterations(1000);
+                seg.setDistanceThreshold(0.01);
+                seg.setInputCloud(cloud);
+                seg.segment(*inliers, *coefficients);
+                // 平面に該当する点を抽出
+                pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_plane(new pcl::PointCloud<pcl::PointXYZRGB>);
+                pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+                extract.setInputCloud(cloud);
+                extract.setIndices(inliers);
+                extract.setNegative(false);
+                extract.filter(*cloud_plane);
+
+                if (inliers->indices.empty()) {
+                    std::cerr << "Plane model not found in the point cloud!" << std::endl;
+                    return;
+                }
+                // 平面以外の点を抽出
+                pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_not_plane(new pcl::PointCloud<pcl::PointXYZRGB>);
+                extract.setNegative(true);
+                extract.filter(*cloud_not_plane);
+
+                // 物体の中心座標と幅を計算
+                if (!cloud_not_plane->empty()) {
+                    std::vector<pcl::PointIndices> cluster_indices;
+                    pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ec;
+                    ec.setClusterTolerance(0.02);  // クラスタとみなす点間の最大距離
+                    ec.setMinClusterSize(100);     // クラスタの最小サイズ
+                    ec.setMaxClusterSize(25000);   // クラスタの最大サイズ
+                    ec.setSearchMethod(tree);
+                    ec.setInputCloud(cloud_not_plane);
+                    ec.extract(cluster_indices);
+
+                    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
+                        pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZRGB>);
+                        for (const auto& idx : it->indices) {
+                            cloud_cluster->points.push_back(cloud_not_plane->points[idx]);
+                        }
+
+                        // 物体の中心座標を計算
+                        Eigen::Vector4f centroid;
+                        pcl::compute3DCentroid(*cloud_cluster, centroid);
+
+                        // 物体の幅を計算
+                        pcl::PointXYZRGB min_point, max_point;
+                        pcl::getMinMax3D(*cloud_cluster, min_point, max_point);
+                        double width = max_point.x - min_point.x;
+
+                        // 物体の中心座標と幅をメッセージに格納
+                        geometry_msgs::msg::PoseStamped object_info_msg;
+                        object_info_msg.header = pointcloud_msg->header;
+                        object_info_msg.pose.position.x = centroid[0];
+                        object_info_msg.pose.position.y = centroid[1];
+                        object_info_msg.pose.position.z = centroid[2];
+                        object_info_msg.pose.orientation.w = centroid[3];
+                        //object_info_msg.pose.orientation.w = width;
+
+                        convertToBaseLinkFrame(object_info_msg);
+
+                        // リストに追加
+                        detected_objects_list.push_back(object_info_msg);
+                    }
+                    // 検出した物体情報を一度にパブリッシュ
+                    publish_detected_objects();
+                }
+
+                // 新しいPointCloud2メッセージを作成
+                sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg = std::make_shared<sensor_msgs::msg::PointCloud2>();
+                pcl::toROSMsg(*cloud_plane, *cloud_msg);
+
+                sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg_not_space = std::make_shared<sensor_msgs::msg::PointCloud2>();
+                pcl::toROSMsg(*cloud_not_plane, *cloud_msg_not_space);
+
+                // 新しいトピックに発行
+                pc_pub->publish(*cloud_msg);
+                pc_not_space_pub->publish(*cloud_msg_not_space);
+                // SpaceFinder 終了
+            } catch (std::exception& e) {
+                RCLCPP_WARN(this->get_logger(), "PointCloud is Empty.");
             }
-
-            // 新しいPointCloud2メッセージを作成
-            sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg = std::make_shared<sensor_msgs::msg::PointCloud2>();
-            pcl::toROSMsg(*cloud_plane, *cloud_msg);
-
-            sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg_not_space = std::make_shared<sensor_msgs::msg::PointCloud2>();
-            pcl::toROSMsg(*cloud_not_plane, *cloud_msg_not_space);
-
-            // 新しいトピックに発行
-            pc_pub->publish(*cloud_msg);
-            pc_not_space_pub->publish(*cloud_msg_not_space);
-            // SpaceFinder 終了
         } // end
     }
 
