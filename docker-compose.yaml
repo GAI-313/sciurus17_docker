@@ -20,6 +20,7 @@ services:
        - $HOME/.Xauthority/:/root/.Xauthority
        - /dev:/dev
        - ./sciurus17_common/:/colcon_ws/src/sciurus17_common/
+       - ./nakalab_cx7_pkgs/:/colcon_ws/src/nakalab_cx7_pkgs/
        #- $PKGS_PATH_ABS:/colcon_ws/src/extra_pkgs
     devices:
        - /dev:/dev
