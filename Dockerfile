@@ -93,7 +93,9 @@ RUN cd /colcon_ws/src ;\
     git clone -b ros2 https://github.com/rt-net/sciurus17_ros.git ;\
     git clone -b ros2 https://github.com/rt-net/sciurus17_description.git ;\
     git clone -b humble-devel https://github.com/rt-net/crane_x7_ros.git ;\
-    git clone -b ros2 https://github.com/rt-net/crane_x7_description
+    git clone -b ros2 https://github.com/rt-net/crane_x7_description ;\
+    git clone https://github.com/IntelRealSense/realsense-ros.git -b ros2-development ;\
+    git clone https://github.com/pal-robotics/realsense_gazebo_plugin.git -b foxy-devel
 RUN sudo apt update ;\
     sudo apt install -y ros-humble-rqt-tf-tree
 RUN sudo apt install -y ros-humble-tf*
